@@ -1,0 +1,14 @@
+*.mp4
+
+
+*.o
+*.a
+*.exe
+*.test
+*.prof
+
+/vendor/
+
+
+go.sum
+
