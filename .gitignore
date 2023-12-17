@@ -6,6 +6,7 @@
 *.exe
 *.test
 *.prof
+*.txt
 
 /vendor/
 

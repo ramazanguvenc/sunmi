@@ -15,11 +15,12 @@ func main() {
 
 	flag.StringVar(&URL, "url", "", "URL of the video")
 	flag.StringVar(&destination, "destination", "video.mp4", "Destination file path")
-	flag.BoolVar(&debug, "debug", false, "Enable debug mode")
+	flag.BoolVar(&debug, "debug", true, "Enable debug mode")
 
 	flag.Parse()
 
 	if debug {
+		fmt.Println("debug enabled!")
 		logging.EnableDebugMode()
 	}
 

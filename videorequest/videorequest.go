@@ -166,15 +166,16 @@ func getQueryID(body string) string {
 
 func getMainJSURL(body string) string {
 
-	pattern := `https://abs\.twimg\.com/responsive-web/client-web-legacy/main\.[^\.]+\.js`
+	pattern := `https://abs\.twimg\.com/responsive-web/client-web/main\.[^\.]+\.js`
 
 	regex, err := regexp.Compile(pattern)
 	if err != nil {
 		logging.Fatal("Error:", err)
 		return ""
 	}
-
+	
 	matches := regex.FindStringSubmatch(body)
+	
 	for _, match := range matches {
 		logging.Println(match)
 	}
@@ -184,7 +185,9 @@ func getMainJSURL(body string) string {
 
 func MakeRequest(URL string) string {
 	request := gorequest.New()
-	_, body, errs := request.Get(URL).Set("User-Agent", "Mozilla/5.0").End()
+	_, body, errs := request.Get(URL).
+    Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36").
+    End()
 	if errs != nil {
 		logging.Fatal("Error:", errs)
 		return ""
