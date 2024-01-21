@@ -1,7 +1,9 @@
 ﻿# sunmi
 
-A simple command-line video downloader tool written in Go.
+A simple command-line video downloader tool for Twitter written in Go.
+
 New to go so code is probably horrible.
+
 Copied most of it from https://github.com/inteoryx/twitter-video-dl except this one works.
 
 ## How to run
