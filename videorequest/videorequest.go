@@ -12,7 +12,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/parnurzeal/gorequest"
+	"github.com/tebeka/selenium"
+	"github.com/tebeka/selenium/chrome"
 )
 
 func ReadJSON(filename, tweetID string) (string, string) {
@@ -167,15 +168,15 @@ func getQueryID(body string) string {
 func getMainJSURL(body string) string {
 
 	pattern := `https://abs\.twimg\.com/responsive-web/client-web/main\.[^\.]+\.js`
-
+	//fmt.Println("pattern:", body)
 	regex, err := regexp.Compile(pattern)
 	if err != nil {
 		logging.Fatal("Error:", err)
 		return ""
 	}
-	
+
 	matches := regex.FindStringSubmatch(body)
-	
+
 	for _, match := range matches {
 		logging.Println(match)
 	}
@@ -183,16 +184,53 @@ func getMainJSURL(body string) string {
 
 }
 
+// MakeRequest handles HTTP GET requests and follows redirects
 func MakeRequest(URL string) string {
-	request := gorequest.New()
-	_, body, errs := request.Get(URL).
-    Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36").
-    End()
-	if errs != nil {
-		logging.Fatal("Error:", errs)
-		return ""
+	chromeDriverPath := "/usr/bin/chromedriver" // Update this path to match your actual Chromedriver path
+
+	// Start ChromeDriver service
+	opts := []selenium.ServiceOption{}
+	service, err := selenium.NewChromeDriverService(chromeDriverPath, 9515, opts...)
+	if err != nil {
+		logging.Fatal("Error starting the ChromeDriver server: %v", err)
 	}
-	return body
+	defer service.Stop()
+
+	// Chrome options
+	chromeCaps := chrome.Capabilities{
+		Path: "",
+		Args: []string{
+			"--headless",              // Run Chrome in headless mode
+			"--no-sandbox",            // Disable sandboxing
+			"--disable-dev-shm-usage", // Disable /dev/shm usage
+		},
+	}
+
+	caps := selenium.Capabilities{
+		"browserName": "chrome",
+	}
+	caps.AddChrome(chromeCaps)
+
+	// Create WebDriver session
+	wd, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", 9515))
+	if err != nil {
+		logging.Fatal("Failed to open session: %v", err)
+	}
+	defer wd.Quit()
+
+	// Navigate to the URL
+	if err := wd.Get(URL); err != nil {
+		logging.Fatal("Failed to load page: %v", err)
+	}
+
+	// Get page source
+	pageSource, err := wd.PageSource()
+	if err != nil {
+		logging.Fatal("Failed to get page source: %v", err)
+	}
+
+	// Print page source
+	return pageSource
 }
 
 func GetVideo(URL, destination string) {
